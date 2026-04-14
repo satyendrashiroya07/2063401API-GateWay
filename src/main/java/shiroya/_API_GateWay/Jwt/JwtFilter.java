@@ -40,8 +40,13 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
             String token = authHeader.substring(7);
 
             try {
-                JwtUtil.validateToken(token);
+                String username = JwtUtil.validateToken(token);
+                System.out.println("Extracted username: " + username);
+                exchange = exchange.mutate()
+                        .request(r -> r.header("X-User-Id", username))
+                        .build();
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException("Invalid Token");
             }
 
