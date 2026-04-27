@@ -5,8 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
+import reactor.core.publisher.Mono;
 import shiroya._API_GateWay.configuration.AppConfig;
 
 import java.security.Key;
@@ -71,15 +74,36 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
                 // this is not needed because while doing claims validation already doing
                 //String username = JwtUtil.validateToken(token);
                 System.out.println("Extracted username: " + userId);
-                exchange = exchange.mutate()
-                        .request(r -> r.header("X-User-Id", userId))
-                        .build();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException("Invalid Token");
             }
 
             return chain.filter(exchange);
+        };
+    }
+
+
+    @Bean
+    public KeyResolver userKeyResolver() {
+        return exchange -> {
+
+            String userId = exchange.getRequest()
+                    .getHeaders()
+                    .getFirst("X-User-Id");
+
+            //Private user (JWT present)
+            if (userId != null) {
+                return Mono.just("USER_" + userId);
+            }
+
+            //Public user (fallback → IP based)
+            String ip = exchange.getRequest()
+                    .getRemoteAddress()
+                    .getAddress()
+                    .getHostAddress();
+
+            return Mono.just("IP_" + ip);
         };
     }
 }
