@@ -24,12 +24,6 @@
 
 	<dependencies>
 
-		<!-- ✅ API Gateway (Reactive) -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-gateway</artifactId>
-		</dependency>
-
 		<!-- ✅ REQUIRED for Gateway -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -55,12 +49,6 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
-		</dependency>
-
-		<!-- ✅ Optional (Good for monitoring/debug) -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<!-- ✅ Test -->

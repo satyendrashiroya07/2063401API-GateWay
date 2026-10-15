@@ -94,6 +94,7 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
 
             //Private user (JWT present)
             if (userId != null) {
+                System.out.println("USER RATE LIMIT: " + userId);
                 return Mono.just("USER_" + userId);
             }
 
@@ -102,7 +103,7 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
                     .getRemoteAddress()
                     .getAddress()
                     .getHostAddress();
-
+            System.out.println("IP RATE LIMIT: " + ip);
             return Mono.just("IP_" + ip);
         };
     }
