@@ -2,7 +2,9 @@ package shiroya._API_GateWay.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
@@ -12,6 +14,7 @@ import org.springframework.util.AntPathMatcher;
 import reactor.core.publisher.Mono;
 import shiroya._API_GateWay.configuration.AppConfig;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.List;
 
@@ -24,6 +27,14 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
     private static final String SECRET = "mysecretkeymysecretkeymysecretkey";
 
     private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
 
     public JwtFilter(AppConfig appConfig) {
@@ -55,7 +66,7 @@ public class JwtFilter extends AbstractGatewayFilterFactory<JwtFilter.Config> {
 
             try {
                 Claims claims = Jwts.parser()
-                        .verifyWith(Keys.hmacShaKeyFor(SECRET.getBytes()))
+                        .verifyWith(getSigningKey())
                         .build()
                         .parseSignedClaims(token)
                         .getPayload();
